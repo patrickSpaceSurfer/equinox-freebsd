@@ -44,25 +44,34 @@
          arch="aarch64"
          version="0.0.0"/>
 
+<!--
    <plugin
-         id="org.eclipse.equinox.launcher.gtk.linux.ppc64le"
-         os="linux"
+         id="org.eclipse.equinox.launcher.gtk.freebsd.powerpc64"
+         os="freebsd"
          ws="gtk"
-         arch="ppc64le"
+         arch="powerpc64"
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.gtk.linux.aarch64"
-         os="linux"
+         id="org.eclipse.equinox.launcher.gtk.freebsd.powerpc64le"
+         os="freebsd"
+         ws="gtk"
+         arch="powerpc64le"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.equinox.launcher.gtk.freebsd.aarch64"
+         os="freebsd"
          ws="gtk"
          arch="aarch64"
          version="0.0.0"/>
+-->
 
    <plugin
-         id="org.eclipse.equinox.launcher.gtk.linux.x86_64"
-         os="linux"
+         id="org.eclipse.equinox.launcher.gtk.freebsd.amd64"
+         os="freebsd"
          ws="gtk"
-         arch="x86_64"
+         arch="amd64"
          version="0.0.0"/>
 
    <plugin
