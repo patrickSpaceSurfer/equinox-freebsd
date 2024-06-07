@@ -17,12 +17,10 @@ import java.util.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.device.Device;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * DeviceTracker class. This class has the logic for refining a Device service.
- *
  */
 public class DeviceTracker extends ServiceTracker {
 	/** OSGi Device class name */
@@ -56,7 +54,7 @@ public class DeviceTracker extends ServiceTracker {
 		log = manager.log;
 
 		if (Activator.DEBUG) {
-			log.log(device, LogService.LOG_DEBUG, this + " constructor"); //$NON-NLS-1$
+			log.debug(device, this + " constructor"); //$NON-NLS-1$
 		}
 
 		open();
@@ -69,7 +67,7 @@ public class DeviceTracker extends ServiceTracker {
 	public void close() {
 		if (device != null) {
 			if (Activator.DEBUG) {
-				log.log(device, LogService.LOG_DEBUG, this + " closing"); //$NON-NLS-1$
+				log.debug(device, this + " closing"); //$NON-NLS-1$
 			}
 
 			running = false; /* request thread to stop */
@@ -92,11 +90,11 @@ public class DeviceTracker extends ServiceTracker {
 	 *
 	 * @param reference Reference to service being added to the ServiceTracker.
 	 * @return The service object to be tracked for the ServiceReference or
-	 *         <tt>null</tt> if the ServiceReference should not be tracked.
+	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
-			log.log(reference, LogService.LOG_DEBUG, this + " adding Device service"); //$NON-NLS-1$
+			log.debug(reference, this + " adding Device service"); //$NON-NLS-1$
 		}
 
 		device = reference;
@@ -134,11 +132,11 @@ public class DeviceTracker extends ServiceTracker {
 	 */
 	public void removedService(ServiceReference reference, Object service) {
 		if (running) {
-			log.log(reference, LogService.LOG_WARNING, DeviceMsg.Device_service_unregistered);
+			log.warn(reference, DeviceMsg.Device_service_unregistered);
 			running = false; /* request algorithm to stop */
 		} else {
 			if (Activator.DEBUG) {
-				log.log(reference, LogService.LOG_DEBUG, this + " removing Device service"); //$NON-NLS-1$
+				log.debug(reference, this + " removing Device service"); //$NON-NLS-1$
 			}
 		}
 		super.removedService(reference, service);
@@ -146,11 +144,10 @@ public class DeviceTracker extends ServiceTracker {
 
 	/**
 	 * Attempt to refine this Device service.
-	 *
 	 */
 	public void refine() {
 		if (Activator.DEBUG) {
-			log.log(device, LogService.LOG_DEBUG, this + " refining " + device); //$NON-NLS-1$
+			log.debug(device, this + " refining " + device); //$NON-NLS-1$
 		}
 
 		if (running && isIdle()) {
@@ -159,7 +156,7 @@ public class DeviceTracker extends ServiceTracker {
 
 			manager.locators.loadDrivers(properties, drivers);
 
-			Vector exclude = new Vector(drivers.size());
+			Vector<ServiceReference> exclude = new Vector<>(drivers.size());
 
 			while (running) {
 				ServiceReference driver = drivers.match(device, exclude);
@@ -195,7 +192,7 @@ public class DeviceTracker extends ServiceTracker {
 	 */
 	public boolean isIdle() {
 		if (Activator.DEBUG) {
-			log.log(device, LogService.LOG_DEBUG, "Check device service idle: " + device); //$NON-NLS-1$
+			log.debug(device, "Check device service idle: " + device); //$NON-NLS-1$
 		}
 
 		Filter filter_ = manager.driverFilter;
@@ -211,7 +208,7 @@ public class DeviceTracker extends ServiceTracker {
 			for (int j = 0; j < servicesCount; j++) {
 				if (filter_.match(services[j])) {
 					if (Activator.DEBUG) {
-						log.log(LogService.LOG_DEBUG, "Device " + device + " already in use by bundle " + users[i]); //$NON-NLS-1$ //$NON-NLS-2$
+						log.debug("Device " + device + " already in use by bundle " + users[i]); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 
 					return (false);
@@ -241,12 +238,12 @@ public class DeviceTracker extends ServiceTracker {
 			// It is possible that this is a Free Format Device that does not
 			// implement Device
 			if (service instanceof Device) {
-				log.log(device, LogService.LOG_INFO, DeviceMsg.Device_noDriverFound_called);
+				log.info(device, DeviceMsg.Device_noDriverFound_called);
 
 				try {
 					((Device) service).noDriverFound();
 				} catch (Throwable t) {
-					log.log(device, LogService.LOG_ERROR, NLS.bind(DeviceMsg.Device_noDriverFound_error, t));
+					log.error(device, NLS.bind(DeviceMsg.Device_noDriverFound_error, t));
 				}
 			}
 		} finally {
@@ -261,7 +258,6 @@ public class DeviceTracker extends ServiceTracker {
 
 	/**
 	 * Readonly Dictionary for device properties.
-	 *
 	 */
 	static class Properties extends Hashtable<String, Object> {
 		private static final long serialVersionUID = -8489170394007899809L;
@@ -321,7 +317,6 @@ public class DeviceTracker extends ServiceTracker {
 		 *
 		 * @param key   header name.
 		 * @param value header value.
-		 * @throws UnsupportedOperationException
 		 */
 		public Object put(String key, Object value) {
 			throw new UnsupportedOperationException();
@@ -331,7 +326,6 @@ public class DeviceTracker extends ServiceTracker {
 		 * Override remove to disable it. This Dictionary is readonly once built.
 		 *
 		 * @param key header name.
-		 * @throws UnsupportedOperationException
 		 */
 		public Object remove(Object key) {
 			throw new UnsupportedOperationException();

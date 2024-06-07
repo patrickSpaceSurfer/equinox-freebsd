@@ -19,12 +19,10 @@ import java.util.Vector;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.device.DriverLocator;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * DriverLocatorTracker class. This class tracks all DriverLocator services.
- *
  */
 public class DriverLocatorTracker extends ServiceTracker {
 	protected final static String clazz = "org.osgi.service.device.DriverLocator"; //$NON-NLS-1$
@@ -41,8 +39,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	/**
 	 * Create the DriverLocatorTracker.
 	 *
-	 * @param context Device manager bundle context.
-	 * @param log     LogService object
+	 * @param manager Device manager bundle context.
 	 */
 	public DriverLocatorTracker(Activator manager) {
 		super(manager.context, clazz, null);
@@ -51,9 +48,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 		log = manager.log;
 		bundles = new Vector<>(10, 10);
 
-		if (Activator.DEBUG) {
-			log.log(LogService.LOG_DEBUG, "DriverLocatorTracker constructor"); //$NON-NLS-1$
-		}
+		log.debug("DriverLocatorTracker constructor"); //$NON-NLS-1$
 
 		open();
 	}
@@ -70,11 +65,11 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 *
 	 * @param reference Reference to service being added to the ServiceTracker.
 	 * @return The service object to be tracked for the ServiceReference or
-	 *         <tt>null</tt> if the ServiceReference should not be tracked.
+	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
-			log.log(reference, LogService.LOG_DEBUG, "DriverLocatorTracker adding service"); //$NON-NLS-1$
+			log.debug(reference, "DriverLocatorTracker adding service"); //$NON-NLS-1$
 		}
 
 		return (context.getService(reference));
@@ -106,7 +101,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 */
 	public void removedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
-			log.log(reference, LogService.LOG_DEBUG, "DriverLocatorTracker removing service"); //$NON-NLS-1$
+			log.debug(reference, "DriverLocatorTracker removing service"); //$NON-NLS-1$
 		}
 
 		context.ungetService(reference);
@@ -116,13 +111,11 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 * Call the DriverLocator services in an attempt to locate and install driver
 	 * bundles to refine the device service.
 	 *
-	 * @param locators Array of DriverLocator objects
-	 * @param drivers  Dictionary of drivers with key=DRIVER_ID, value=Driver object
+	 * @param drivers Dictionary of drivers with key=DRIVER_ID, value=Driver object
 	 */
 	public void loadDrivers(Dictionary<String, ?> properties, DriverTracker drivers) {
 		if (Activator.DEBUG) {
-			log.log(LogService.LOG_DEBUG,
-					Thread.currentThread().getName() + ": DriverLocatorTracker loadDrivers called"); //$NON-NLS-1$
+			log.debug(Thread.currentThread().getName() + ": DriverLocatorTracker loadDrivers called"); //$NON-NLS-1$
 		}
 
 		ServiceReference[] references = getServiceReferences();
@@ -136,8 +129,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 
 				if (service != null) {
 					if (Activator.DEBUG) {
-						log.log(locator, LogService.LOG_DEBUG,
-								Thread.currentThread().getName() + ": DriverLocator findDrivers called"); //$NON-NLS-1$
+						log.debug(locator, Thread.currentThread().getName() + ": DriverLocator findDrivers called"); //$NON-NLS-1$
 					}
 
 					try {
@@ -159,7 +151,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 
 							sb.append('>');
 
-							log.log(locator, LogService.LOG_DEBUG,
+							log.debug(locator,
 									Thread.currentThread().getName() + ": DriverLocator findDrivers returned: " + sb); //$NON-NLS-1$
 						}
 
@@ -171,7 +163,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 
 								if (drivers.getDriver(driver_id) == null) {
 									if (Activator.DEBUG) {
-										log.log(locator, LogService.LOG_DEBUG, Thread.currentThread().getName()
+										log.debug(locator, Thread.currentThread().getName()
 												+ ": DriverLocator loadDriver called for driver: " + driver_id); //$NON-NLS-1$
 									}
 
@@ -179,20 +171,20 @@ public class DriverLocatorTracker extends ServiceTracker {
 										InputStream in = service.loadDriver(driver_id);
 
 										if (Activator.DEBUG) {
-											log.log(locator, LogService.LOG_DEBUG, Thread.currentThread().getName()
+											log.debug(locator, Thread.currentThread().getName()
 													+ ": DriverLocator loadDriver returned: " + in); //$NON-NLS-1$
 										}
 
 										installDriverBundle(driver_id, in);
 									} catch (Throwable t) {
-										log.log(locator, LogService.LOG_ERROR,
+										log.error(locator,
 												NLS.bind(DeviceMsg.DriverLocator_unable_to_load_driver, driver_id), t);
 									}
 								}
 							}
 						}
 					} catch (Throwable t) {
-						log.log(locator, LogService.LOG_ERROR, DeviceMsg.DriverLocator_error_calling_findDrivers, t);
+						log.error(locator, DeviceMsg.DriverLocator_error_calling_findDrivers, t);
 					}
 				}
 			}
@@ -209,8 +201,8 @@ public class DriverLocatorTracker extends ServiceTracker {
 
 	public void loadDriver(String driver_id, DriverTracker drivers) {
 		if (Activator.DEBUG) {
-			log.log(LogService.LOG_DEBUG, Thread.currentThread().getName()
-					+ ": DriverLocatorTracker loadDriver called for driver: " + driver_id); //$NON-NLS-1$
+			log.debug(Thread.currentThread().getName() + ": DriverLocatorTracker loadDriver called for driver: " //$NON-NLS-1$
+					+ driver_id);
 		}
 
 		if (drivers.getDriver(driver_id) == null) {
@@ -225,7 +217,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 
 					if (service != null) {
 						if (Activator.DEBUG) {
-							log.log(locator, LogService.LOG_DEBUG, Thread.currentThread().getName()
+							log.debug(locator, Thread.currentThread().getName()
 									+ ": DriverLocator loadDriver called for driver: " + driver_id); //$NON-NLS-1$
 						}
 
@@ -233,7 +225,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 							InputStream in = service.loadDriver(driver_id);
 
 							if (Activator.DEBUG) {
-								log.log(locator, LogService.LOG_DEBUG, Thread.currentThread().getName()
+								log.debug(locator, Thread.currentThread().getName()
 										+ ": DriverLocator loadDriver returned: " + in); //$NON-NLS-1$
 							}
 
@@ -243,8 +235,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 								break;
 							}
 						} catch (Throwable t) {
-							log.log(locator, LogService.LOG_ERROR,
-									NLS.bind(DeviceMsg.DriverLocator_unable_to_load_driver, driver_id), t);
+							log.error(locator, NLS.bind(DeviceMsg.DriverLocator_unable_to_load_driver, driver_id), t);
 						}
 					}
 				}
@@ -260,8 +251,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 */
 	public void installDriverBundle(String driver_id, InputStream in) {
 		if (Activator.DEBUG) {
-			log.log(LogService.LOG_DEBUG,
-					Thread.currentThread().getName() + ": installDriverBundle from InputStream: " + driver_id); //$NON-NLS-1$
+			log.debug(Thread.currentThread().getName() + ": installDriverBundle from InputStream: " + driver_id); //$NON-NLS-1$
 		}
 
 		if (in != null) {
@@ -272,8 +262,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 				/* installBundle will close the InputStream */
 
 				if (Activator.DEBUG) {
-					log.log(LogService.LOG_DEBUG,
-							Thread.currentThread().getName() + ": Driver bundle installed: " + driver_id); //$NON-NLS-1$
+					log.debug(Thread.currentThread().getName() + ": Driver bundle installed: " + driver_id); //$NON-NLS-1$
 				}
 
 				synchronized (bundles) {
@@ -285,12 +274,10 @@ public class DriverLocatorTracker extends ServiceTracker {
 				bundle.start();
 
 				if (Activator.DEBUG) {
-					log.log(LogService.LOG_DEBUG,
-							Thread.currentThread().getName() + ": Driver bundle started: " + driver_id); //$NON-NLS-1$
+					log.debug(Thread.currentThread().getName() + ": Driver bundle started: " + driver_id); //$NON-NLS-1$
 				}
 			} catch (BundleException e) {
-				log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.Unable_to_install_or_start_driver_bundle, driver_id),
-						e);
+				log.error(NLS.bind(DeviceMsg.Unable_to_install_or_start_driver_bundle, driver_id), e);
 
 				if (bundle != null) {
 					bundles.removeElement(bundle);
@@ -299,12 +286,10 @@ public class DriverLocatorTracker extends ServiceTracker {
 						bundle.uninstall();
 
 						if (Activator.DEBUG) {
-							log.log(LogService.LOG_DEBUG,
-									Thread.currentThread().getName() + ": Driver bundle uninstalled: " + driver_id); //$NON-NLS-1$
+							log.debug(Thread.currentThread().getName() + ": Driver bundle uninstalled: " + driver_id); //$NON-NLS-1$
 						}
 					} catch (BundleException ee) {
-						log.log(LogService.LOG_ERROR,
-								NLS.bind(DeviceMsg.Unable_to_uninstall_driver_bundle_number, driver_id), ee);
+						log.error(NLS.bind(DeviceMsg.Unable_to_uninstall_driver_bundle_number, driver_id), ee);
 					}
 
 					bundle = null;
@@ -324,7 +309,6 @@ public class DriverLocatorTracker extends ServiceTracker {
 
 	/**
 	 * Uninstall the recently installed but unused driver bundles.
-	 *
 	 */
 	public void uninstallDriverBundles() {
 		int size;
@@ -347,10 +331,10 @@ public class DriverLocatorTracker extends ServiceTracker {
 					bundle.uninstall();
 
 					if (Activator.DEBUG) {
-						log.log(LogService.LOG_DEBUG, Thread.currentThread().getName() + ": Driver bundle uninstalled"); //$NON-NLS-1$
+						log.debug(Thread.currentThread().getName() + ": Driver bundle uninstalled"); //$NON-NLS-1$
 					}
 				} catch (BundleException ee) {
-					log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.Unable_to_uninstall_driver_bundle, ee));
+					log.error(NLS.bind(DeviceMsg.Unable_to_uninstall_driver_bundle, ee));
 				}
 			}
 		}

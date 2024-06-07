@@ -35,25 +35,31 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 		if (!setTccl || bundle == null)
 			return createService();
 		/*
-		 * Set the TCCL while creating jaxp factory instances to the
-		 * requesting bundles class loader.  This is needed to
-		 * work around bug 285505.  There are issues if multiple
-		 * xerces implementations are available on the bundles class path
+		 * Set the TCCL while creating jaxp factory instances to the requesting bundles
+		 * class loader. This is needed to work around bug 285505. There are issues if
+		 * multiple xerces implementations are available on the bundles class path
 		 *
-		 * The real issue is that the ContextFinder will only delegate
-		 * to the framework class loader in this case.  This class
-		 * loader forces the requesting bundle to be delegated to for
-		 * TCCL loads.
+		 * The real issue is that the ContextFinder will only delegate to the framework
+		 * class loader in this case. This class loader forces the requesting bundle to
+		 * be delegated to for TCCL loads.
 		 */
 		final ClassLoader savedClassLoader = Thread.currentThread().getContextClassLoader();
+		boolean restoreTccl = true;
 		try {
 			BundleWiring wiring = bundle.adapt(BundleWiring.class);
 			ClassLoader cl = wiring == null ? null : wiring.getClassLoader();
-			if (cl != null)
-				Thread.currentThread().setContextClassLoader(cl);
+			if (cl != null) {
+				try {
+					Thread.currentThread().setContextClassLoader(cl);
+				} catch (RuntimeException e) {
+					// move on without setting TCCL (https://github.com/eclipse-equinox/equinox/issues/303)
+					restoreTccl = false;
+				}
+			}
 			return createService();
 		} finally {
-			Thread.currentThread().setContextClassLoader(savedClassLoader);
+			if (restoreTccl)
+				Thread.currentThread().setContextClassLoader(savedClassLoader);
 		}
 	}
 

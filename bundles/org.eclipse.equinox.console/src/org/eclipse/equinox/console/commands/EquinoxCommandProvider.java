@@ -195,8 +195,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * Constructor.
 	 *
 	 * start() must be called after creating this object.
-	 *
-	 * @param framework The current instance of the framework
 	 */
 	public EquinoxCommandProvider(BundleContext context, Activator activator) {
 		this.context = context;
@@ -246,7 +244,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handle the shutdown command. Shutdown the OSGi framework.
-	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION)
 	public void shutdown() throws Exception {
@@ -480,8 +477,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handle the status command's abbreviation. Invoke status()
-	 *
-	 * @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION)
 	public void s(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments)
@@ -491,8 +486,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handle the status command. Display installed bundles and registered services.
-	 *
-	 * @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION)
 	public void status(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments)
@@ -744,8 +737,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handle the bundles command. Display details for all installed bundles.
-	 *
-	 * @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_BUNDLES_COMMAND_DESCRIPTION)
 	public void bundles(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments)
@@ -1088,7 +1079,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handle the init command. Uninstall all bundles.
-	 *
 	 */
 	@SuppressWarnings("deprecation")
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_INIT_COMMAND_DESCRIPTION)
@@ -1141,7 +1131,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handle the close command. Shutdown and exit.
-	 * 
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_CLOSE_COMMAND_DESCRIPTION)
 	public void close(CommandSession session) throws Exception {
@@ -1261,7 +1250,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handles the props command's abbreviation. Invokes props()
-	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_PROPS_COMMAND_DESCRIPTION)
 	public Dictionary<?, ?> pr() throws Exception {
@@ -1270,7 +1258,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handles the _props command. Prints the system properties sorted.
-	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_PROPS_COMMAND_DESCRIPTION)
 	public Dictionary<?, ?> props() throws Exception {
@@ -1327,8 +1314,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Prints the short version of the status. For the long version use "status".
-	 *
-	 * @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SS_COMMAND_DESCRIPTION)
 	public void ss(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments)
@@ -1423,7 +1408,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Handles the threads command abbreviation. Invokes threads().
-	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_DESCRIPTION)
 	public void t() throws Exception {
@@ -1458,7 +1442,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	/**
 	 * Prints the information about the currently running threads in the embedded
 	 * system.
-	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_THROWABLE_DESCRIPTION)
 	public void threads(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action,
@@ -1642,8 +1625,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	/**
 	 * Lists required bundles having the specified symbolic name or all if no bsn is
 	 * specified
-	 *
-	 * @param symbolicName
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_DESCRIPTION)
 	public void requiredBundles(
@@ -1654,8 +1635,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	/**
 	 * Lists required bundles having the specified symbolic name or all if no bsn is
 	 * specified
-	 *
-	 * @param symbolicName
 	 */
 	@SuppressWarnings("deprecation")
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_DESCRIPTION)
@@ -1893,7 +1872,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * Given a string containing a startlevel value, validate it and convert it to
 	 * an int
 	 *
-	 * @param intp  A CommandInterpreter object used for printing out error messages
 	 * @param value A string containing a potential startlevel
 	 * @return The start level or an int <0 if it was invalid
 	 */

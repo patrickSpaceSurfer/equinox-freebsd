@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.executable"
       label="%featureName"
-      version="3.8.2300.qualifier"
+      version="3.8.2500.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -72,6 +72,13 @@
          os="freebsd"
          ws="gtk"
          arch="amd64"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.equinox.launcher.win32.win32.aarch64"
+         os="win32"
+         ws="win32"
+         arch="aarch64"
          version="0.0.0"/>
 
    <plugin

@@ -103,7 +103,6 @@ public class SubMonitorTest {
 	 * remaining work, and will run for the given number of iterations. Retuns the
 	 * number of ticks reported (out of 1000).
 	 *
-	 * @param ratio
 	 * @return the number of ticks reported
 	 */
 	private double runInfiniteProgress(int ratio, int iterations) {
@@ -750,8 +749,6 @@ public class SubMonitorTest {
 	 * Creates a chain of n nested progress monitors. Calls beginTask on all
 	 * monitors except for the innermost one.
 	 *
-	 * @param parent
-	 * @param depth
 	 * @return the innermost SubMonitor
 	 */
 	public static SubMonitor createSubProgressChain(SubMonitor parent, int depth) {
@@ -771,7 +768,7 @@ public class SubMonitorTest {
 	 * Tests progress monitor creation and cleanup time, and ensures that excess
 	 * progress is being collected when IProgressMonitor.done() is called.
 	 *
-	 * @param monitor  progress monitor (callers are responsible for calling done()
+	 * @param parent   progress monitor (callers are responsible for calling done()
 	 *                 if necessary)
 	 * @param loopSize total size of the recursion tree
 	 */
@@ -824,7 +821,7 @@ public class SubMonitorTest {
 	 * using internalWorked and half is reported using worked, to simulate mixed
 	 * usage of the progress monitor.
 	 *
-	 * @param monitor  progress monitor (callers are responsible for calling done()
+	 * @param parent   progress monitor (callers are responsible for calling done()
 	 *                 if necessary)
 	 * @param loopSize total size of the recursion tree
 	 */

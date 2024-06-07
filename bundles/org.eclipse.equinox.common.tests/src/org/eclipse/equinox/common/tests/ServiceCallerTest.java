@@ -14,7 +14,15 @@
 package org.eclipse.equinox.common.tests;
 
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.osgi.framework.FrameworkUtil.asDictionary;
 
 import java.io.IOException;
@@ -27,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.ServiceCaller;
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -37,7 +45,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 
-public class ServiceCallerTest extends CoreTest {
+public class ServiceCallerTest {
 	static class ServiceExampleFactory implements ServiceFactory<IServiceExample> {
 		final Map<Bundle, AtomicInteger> createCount = new ConcurrentHashMap<>();
 		volatile ServiceExample lastCreated;
@@ -60,18 +68,7 @@ public class ServiceCallerTest extends CoreTest {
 		}
 	}
 
-	/**
-	 * Need a zero argument constructor to satisfy the test harness. This
-	 * constructor should not do any real work nor should it be called by user code.
-	 */
-	public ServiceCallerTest() {
-		super(null);
-	}
-
-	public ServiceCallerTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testCallOnce() {
 		Bundle bundle = FrameworkUtil.getBundle(ServiceCallerTest.class);
 		assertNotNull("Test only works under an OSGi runtime", bundle);
@@ -106,6 +103,7 @@ public class ServiceCallerTest extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testCall() throws IOException, BundleException, ClassNotFoundException {
 		Bundle bundle = FrameworkUtil.getBundle(ServiceCallerTest.class);
 		assertNotNull("Test only works under an OSGi runtime", bundle);
@@ -209,22 +207,20 @@ public class ServiceCallerTest extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testInvalidFilter() {
-		try {
-			new ServiceCaller<>(getClass(), IServiceExample.class, "invalid filter");
-			fail("Expected an exception on invalid filter.");
-		} catch (IllegalArgumentException e) {
-			assertTrue("Unexpected cause.", e.getCause() instanceof InvalidSyntaxException);
-		}
-		try {
+		IllegalArgumentException exceptionOnConstructor = assertThrows(IllegalArgumentException.class,
+				() -> new ServiceCaller<>(getClass(), IServiceExample.class, "invalid filter"));
+		assertThat("Unexpected cause.", exceptionOnConstructor.getCause(), instanceOf(InvalidSyntaxException.class));
+
+		IllegalArgumentException exceptionOnCall = assertThrows(IllegalArgumentException.class, () -> {
 			ServiceCaller.callOnce(getClass(), IServiceExample.class, "invalid filter", (example) -> {
 			});
-			fail("Expected an exception on invalid filter.");
-		} catch (IllegalArgumentException e) {
-			assertTrue("Unexpected cause.", e.getCause() instanceof InvalidSyntaxException);
-		}
+		});
+		assertThat("Unexpected cause.", exceptionOnCall.getCause(), instanceOf(InvalidSyntaxException.class));
 	}
 
+	@Test
 	public void testRank() {
 		Bundle bundle = FrameworkUtil.getBundle(ServiceCallerTest.class);
 		assertNotNull("Test only works under an OSGi runtime", bundle);
@@ -255,6 +251,18 @@ public class ServiceCallerTest extends CoreTest {
 
 			reg1.setProperties(asDictionary(singletonMap(Constants.SERVICE_RANKING, 1)));
 			assertHighestRankedCalled(caller, s2, s1, s3, reg2, reg1, reg3);
+
+			// re-register a new service with highest rank
+			reg3.unregister();
+			reg3 = context.registerService(IServiceExample.class, s3,
+					asDictionary(singletonMap(Constants.SERVICE_RANKING, 200)));
+			assertHighestRankedCalled(caller, s3, s2, s1, reg3, reg2, reg1);
+
+			// re-register another service with lower rank
+			reg1.unregister();
+			reg1 = context.registerService(IServiceExample.class, s1,
+					asDictionary(singletonMap(Constants.SERVICE_RANKING, 200)));
+			assertHighestRankedCalled(caller, s3, s2, s1, reg3, reg2, reg1);
 		} finally {
 			if (reg1 != null) {
 				reg1.unregister();

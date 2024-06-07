@@ -15,7 +15,6 @@ package org.eclipse.equinox.device;
 
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -25,7 +24,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  *
  * This implementation does not include the optimizations in section 8.7.4 of
  * the OSGi SP R2 spec.
- *
  */
 public class Activator implements BundleActivator, ServiceTrackerCustomizer, FrameworkListener, Runnable {
 	protected final static boolean DEBUG = false;
@@ -93,7 +91,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 	/**
 	 * Create a DeviceManager object.
-	 *
 	 */
 
 	public Activator() {
@@ -123,7 +120,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 																														//// ////-2$
 																														//// ////-3$
 		} catch (InvalidSyntaxException e) {
-			log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.Unable_to_create_Filter_for_DeviceManager, e)); //// -1$
+			log.error(NLS.bind(DeviceMsg.Unable_to_create_Filter_for_DeviceManager, e)); //// -1$
 			throw e;
 		}
 
@@ -148,7 +145,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			startDeviceManager();
 		}
 
-		log.log(LogService.LOG_INFO, DeviceMsg.DeviceManager_started);
+		log.info(DeviceMsg.DeviceManager_started);
 	}
 
 	/**
@@ -164,7 +161,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			try {
 				startDeviceManager();
 			} catch (Throwable t) {
-				log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); //// -1$
+				log.error(NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); //// -1$
 			}
 
 			break;
@@ -174,7 +171,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 	/**
 	 * Start the DeviceManager thread.
-	 *
 	 */
 	public void startDeviceManager() {
 		if (!running) {
@@ -268,11 +264,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 *
 	 * @param reference Reference to service being added to the ServiceTracker.
 	 * @return The service object to be tracked for the ServiceReference or
-	 *         <tt>null</tt> if the ServiceReference should not be tracked.
+	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
-			this.log.log(reference, LogService.LOG_DEBUG, "DeviceManager device service registered"); //$NON-NLS-1$
+			this.log.debug(reference, "DeviceManager device service registered"); //$NON-NLS-1$
 		}
 
 		enqueue(new DeviceTracker(this, reference));
@@ -306,7 +302,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 */
 	public void removedService(ServiceReference reference, Object object) {
 		if (Activator.DEBUG) {
-			log.log(reference, LogService.LOG_DEBUG, "DeviceManager device service unregistered"); //$NON-NLS-1$
+			log.debug(reference, "DeviceManager device service unregistered"); //$NON-NLS-1$
 		}
 
 		/*
@@ -316,9 +312,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	}
 
 	public void refineIdleDevices() {
-		if (Activator.DEBUG) {
-			log.log(LogService.LOG_DEBUG, "DeviceManager refining idle device services"); //$NON-NLS-1$
-		}
+		log.debug("DeviceManager refining idle device services"); //$NON-NLS-1$
 
 		ServiceReference[] references = devices.getServiceReferences();
 
@@ -351,7 +345,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			try {
 				device.refine();
 			} catch (Throwable t) {
-				log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); //// -1$
+				log.error(NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); //// -1$
 			}
 		}
 	}
@@ -363,9 +357,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 */
 	public synchronized void enqueue(DeviceTracker device) {
 		if (device != null) {
-			if (Activator.DEBUG) {
-				log.log(LogService.LOG_DEBUG, "DeviceManager queuing DeviceTracker"); //$NON-NLS-1$
-			}
+			log.debug("DeviceManager queuing DeviceTracker"); //$NON-NLS-1$
 
 			DeviceService item = new DeviceService(device);
 
@@ -407,9 +399,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			locators.uninstallDriverBundles();
 
 			try {
-				if (Activator.DEBUG) {
-					log.log(LogService.LOG_DEBUG, "DeviceManager waiting on queue"); //$NON-NLS-1$
-				}
+				log.debug("DeviceManager waiting on queue"); //$NON-NLS-1$
 
 				wait();
 			} catch (InterruptedException e) {

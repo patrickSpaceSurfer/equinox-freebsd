@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -93,7 +93,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	/**
 	 * Used by {@link ApplicationDescriptor} to determine if an application is
 	 * locked.
-	 * 
+	 *
 	 * @param desc the application descriptor
 	 * @return true if the application is persistently locked.
 	 */
@@ -106,7 +106,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	/**
 	 * Used by {@link ApplicationDescriptor} to determine lock and unlock and
 	 * application.
-	 * 
+	 *
 	 * @param desc   the application descriptor
 	 * @param locked the locked flag
 	 */
@@ -140,15 +140,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	/**
 	 * Used by {@link ScheduledApplication} to persistently schedule an application
 	 * launch
-	 * 
-	 * @param descriptor
-	 * @param arguments
-	 * @param topic
-	 * @param eventFilter
-	 * @param recurring
+	 *
 	 * @return the scheduled application
-	 * @throws InvalidSyntaxException
-	 * @throws ApplicationException
 	 */
 	public static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId,
 			Map<String, Object> arguments, String topic, String eventFilter, boolean recurring)
@@ -280,7 +273,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 				String topic = readString(in, false);
 				String eventFilter = readString(in, false);
 				boolean recurring = in.readBoolean();
-				Map args = (Map) in.readObject();
+				@SuppressWarnings("unchecked")
+				Map<String, Object> args = (Map<String, Object>) in.readObject();
 				EclipseScheduledApplication schedApp = new EclipseScheduledApplication(context, id, appPid, args, topic,
 						eventFilter, recurring);
 				addScheduledApp(schedApp);

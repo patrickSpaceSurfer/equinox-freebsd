@@ -46,7 +46,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	 * the transformed entity is returned instead of the original.
 	 * 
 	 * @param transformerHook the transformer hook
-	 * @param data            the original data
+	 * @param generation      the original data
 	 * @param delegate        the original file
 	 */
 	public TransformedBundleFile(TransformerHook transformerHook, Generation generation, BundleFile delegate) {
@@ -126,8 +126,6 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	/**
 	 * Return whether the given string matches the given pattern.
 	 * 
-	 * @param pattern
-	 * @param string
 	 * @return whether the given string matches the given pattern
 	 */
 	private boolean match(Pattern pattern, String string) {
@@ -197,7 +195,6 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	 * Answers whether the resource at the given path or any of its children has a
 	 * transform associated with it.
 	 * 
-	 * @param path
 	 * @return whether the resource at the given path or any of its children has a
 	 *         transform associated with it.
 	 */

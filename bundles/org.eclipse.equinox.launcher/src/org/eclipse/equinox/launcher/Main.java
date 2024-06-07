@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,18 +18,49 @@
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.net.URLStreamHandlerFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.*;
-import java.util.*;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Policy;
+import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import org.eclipse.equinox.internal.launcher.Constants;
 
 /**
  * The launcher for Eclipse.
@@ -269,6 +300,8 @@ public class Main {
 	private static final String KEY_CONFIGINI_TIMESTAMP = "configIniTimestamp"; //$NON-NLS-1$
 	private static final String PROP_IGNORE_USER_CONFIGURATION = "eclipse.ignoreUserConfiguration"; //$NON-NLS-1$
 
+	private static final Set<PosixFilePermission> PERMISSION_755 = PosixFilePermissions.fromString("rwxr-xr-x"); //$NON-NLS-1$
+
 	/**
 	 * A structured form for a version identifier.
 	 *
@@ -413,15 +446,6 @@ public class Main {
 		return name;
 	}
 
-	private String getFragmentString(String fragmentOS, String fragmentWS, String fragmentArch) {
-		StringJoiner buffer = new StringJoiner("."); //$NON-NLS-1$
-		buffer.add(PLUGIN_ID).add(fragmentWS).add(fragmentOS);
-		if (!(fragmentOS.equals(Constants.OS_MACOSX) && !Constants.ARCH_X86_64.equals(fragmentArch))) {
-			buffer.add(fragmentArch);
-		}
-		return buffer.toString();
-	}
-
 	/**
 	 *  Sets up the JNI bridge to native calls
 	 */
@@ -441,11 +465,8 @@ public class Main {
 		}
 		if (libPath == null) {
 			//find our fragment name
-			String fragmentOS = getOS();
-			String fragmentWS = getWS();
-			String fragmentArch = getArch();
-
-			libPath = getLibraryPath(getFragmentString(fragmentOS, fragmentWS, fragmentArch), defaultPath);
+			String fragmentName = String.join(".", PLUGIN_ID, getWS(), getOS(), getArch()); //$NON-NLS-1$
+			libPath = getLibraryPath(fragmentName, defaultPath);
 		}
 		library = libPath;
 		if (library != null)
@@ -475,10 +496,6 @@ public class Main {
 				for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
 					File entryFile = new File(urls[i].getFile());
 					String dir = entryFile.getParent();
-					if (inDevelopmentMode) {
-						String devDir = dir + "/" + PLUGIN_ID + "/fragments"; //$NON-NLS-1$ //$NON-NLS-2$
-						fragment = searchFor(fragmentName, devDir);
-					}
 					if (fragment == null)
 						fragment = searchFor(fragmentName, dir);
 					if (fragment != null)
@@ -522,7 +539,7 @@ public class Main {
 				String lib = extractFromJAR(fragment, entry);
 				if (!getOS().equals("win32")) { //$NON-NLS-1$
 					try {
-						Runtime.getRuntime().exec(new String[] {"chmod", "755", lib}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
+						Files.setPosixFilePermissions(Paths.get(lib), PERMISSION_755);
 					} catch (Throwable e) {
 						//ignore
 					}
@@ -715,7 +732,7 @@ public class Main {
 				return false;
 			}
 		}
-		if (!canWrite(configDir)) {
+		if (!canWrite(configDir, getOS())) {
 			System.setProperty(PROP_EXITCODE, "15"); //$NON-NLS-1$
 			System.setProperty(PROP_EXITDATA, "<title>Invalid Configuration Location</title>The configuration area at '" + configDir + //$NON-NLS-1$
 					"' is not writable.  Please choose a writable location using the '-configuration' command line option."); //$NON-NLS-1$
@@ -1273,19 +1290,24 @@ public class Main {
 		// TODO a little dangerous here.  Basically we have to assume that it is a file URL.
 		if (install.getProtocol().equals("file")) { //$NON-NLS-1$
 			File installDir = new File(install.getFile());
-			if (canWrite(installDir))
+			if (canWrite(installDir, getOS()))
 				return installDir.getAbsolutePath() + File.separator + CONFIG_DIR;
 		}
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
 	}
 
-	private static boolean canWrite(File installDir) {
+	private static boolean canWrite(File installDir, String os) {
 		if (!installDir.isDirectory())
 			return false;
 
-		if (Files.isWritable(installDir.toPath()))
+		if (Files.isWritable(installDir.toPath())) {
 			return true;
+		} else if (Constants.OS_ZOS.equals(os)) {
+			// For z/OS avoid doing the windows specific .dll check below.
+			// This causes additional alarms on z/OS for unauthorized attempts to write.
+			return false;
+		}
 
 		File fileTest = null;
 		try {
@@ -1320,7 +1342,7 @@ public class Main {
 		File installDir = new File(installURL.getFile());
 		String installDirHash = getInstallDirHash();
 
-		if (protectBase && Constants.OS_MACOSX.equals(os)) {
+		if (protectBase && Constants.OS_MACOSX.equals(getOS())) {
 			initializeBridgeEarly();
 			String macConfiguration = computeConfigurationLocationForMacOS();
 			if (macConfiguration != null) {
@@ -1487,8 +1509,6 @@ public class Main {
 		} finally {
 			// always try putting down the splash screen just in case the application failed to do so
 			takeDownSplash();
-			if (bridge != null)
-				bridge.uninitialize();
 		}
 		// Return an int exit code and ensure the system property is set.
 		System.setProperty(PROP_EXITCODE, Integer.toString(result));

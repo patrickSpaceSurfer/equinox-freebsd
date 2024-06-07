@@ -58,13 +58,12 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	}
 
 	/**
-	 * @throws ServletException
 	 * @see ExtendedHttpService#registerFilter(String, Filter, Dictionary,
 	 *      HttpContext)
 	 */
 	@Override
 	public synchronized void registerFilter(final String alias, final Filter filter,
-			final Dictionary<String, String> initparams, HttpContext httpContext) throws ServletException {
+			final Dictionary<String, String> initparams, HttpContext httpContext) {
 
 		checkShutdown();
 
@@ -89,11 +88,9 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	}
 
 	/**
-	 * @throws NamespaceException
 	 * @see HttpService#registerResources(String, String, HttpContext)
 	 */
-	public synchronized void registerResources(final String alias, final String name, HttpContext httpContext)
-			throws NamespaceException {
+	public synchronized void registerResources(final String alias, final String name, HttpContext httpContext) {
 
 		checkShutdown();
 		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
@@ -109,12 +106,10 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	}
 
 	/**
-	 * @throws ServletException
-	 * @throws NamespaceException
 	 * @see HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)
 	 */
 	public synchronized void registerServlet(final String alias, final Servlet servlet,
-			final Dictionary<?, ?> initparams, HttpContext httpContext) throws ServletException, NamespaceException {
+			final Dictionary<?, ?> initparams, HttpContext httpContext) {
 
 		checkShutdown();
 		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);

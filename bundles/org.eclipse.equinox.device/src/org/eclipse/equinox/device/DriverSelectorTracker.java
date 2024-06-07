@@ -16,12 +16,10 @@ package org.eclipse.equinox.device;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.device.Device;
 import org.osgi.service.device.DriverSelector;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * DriverSelectorTracker class. This class tracks all DriverSelector services.
- *
  */
 public class DriverSelectorTracker extends ServiceTracker {
 	/** Driver service name */
@@ -37,7 +35,6 @@ public class DriverSelectorTracker extends ServiceTracker {
 	 * Create the DriverTracker.
 	 *
 	 * @param manager DeviceManager object.
-	 * @param device  DeviceTracker we are working for.
 	 */
 	public DriverSelectorTracker(Activator manager) {
 		super(manager.context, clazz, null);
@@ -45,9 +42,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 		this.manager = manager;
 		log = manager.log;
 
-		if (Activator.DEBUG) {
-			log.log(LogService.LOG_DEBUG, "DriverSelectorTracker constructor"); //$NON-NLS-1$
-		}
+		log.debug("DriverSelectorTracker constructor"); //$NON-NLS-1$
 
 		open();
 	}
@@ -61,7 +56,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 	 */
 	public ServiceReference select(ServiceReference device, Match[] matches) {
 		if (Activator.DEBUG) {
-			log.log(device, LogService.LOG_DEBUG, "DriverSelector select called"); //$NON-NLS-1$
+			log.debug(device, "DriverSelector select called"); //$NON-NLS-1$
 		}
 
 		// This should give us the highest ranking DriverSelector (if available)
@@ -79,7 +74,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 
 				return matches[index].getDriver();
 			} catch (Throwable t) {
-				log.log(selector, LogService.LOG_ERROR, DeviceMsg.DriverSelector_error_during_match, t);
+				log.error(selector, DeviceMsg.DriverSelector_error_during_match, t);
 			}
 		}
 
@@ -120,7 +115,6 @@ public class DriverSelectorTracker extends ServiceTracker {
 	/**
 	 * Select the service with the highest service.ranking. Break ties buy selecting
 	 * the lowest service.id.
-	 *
 	 */
 	public ServiceReference breakTie(ServiceReference ref1, ServiceReference ref2) {
 		// first we check service rankings

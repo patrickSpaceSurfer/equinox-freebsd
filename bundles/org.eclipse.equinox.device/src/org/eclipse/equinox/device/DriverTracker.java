@@ -21,12 +21,10 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.device.Device;
 import org.osgi.service.device.Driver;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * DriverTracker class. This class tracks all Driver services.
- *
  */
 public class DriverTracker extends ServiceTracker {
 	/** Driver service name */
@@ -57,7 +55,6 @@ public class DriverTracker extends ServiceTracker {
 	 * Create the DriverTracker.
 	 *
 	 * @param manager DeviceManager object.
-	 * @param device  DeviceTracker we are working for.
 	 */
 	public DriverTracker(Activator manager) {
 		super(manager.context, clazz, null);
@@ -69,9 +66,7 @@ public class DriverTracker extends ServiceTracker {
 		matches = new Hashtable<>(37);
 		referrals = new Hashtable<>(37);
 
-		if (Activator.DEBUG) {
-			log.log(LogService.LOG_DEBUG, this + " constructor"); //$NON-NLS-1$
-		}
+		log.debug(this + " constructor"); //$NON-NLS-1$
 
 		open();
 	}
@@ -88,18 +83,17 @@ public class DriverTracker extends ServiceTracker {
 	 *
 	 * @param reference Reference to service being added to the ServiceTracker.
 	 * @return The service object to be tracked for the ServiceReference or
-	 *         <tt>null</tt> if the ServiceReference should not be tracked.
+	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
-			log.log(reference, LogService.LOG_DEBUG, this + " adding service"); //$NON-NLS-1$
+			log.debug(reference, this + " adding service"); //$NON-NLS-1$
 		}
 
 		String driver_id = getDriverID(reference);
 
 		if (drivers.get(driver_id) != null) {
-			log.log(reference, LogService.LOG_WARNING,
-					NLS.bind(DeviceMsg.Multiple_Driver_services_with_the_same_DRIVER_ID, driver_id));
+			log.warn(reference, NLS.bind(DeviceMsg.Multiple_Driver_services_with_the_same_DRIVER_ID, driver_id));
 
 			return (null); /* don't track this driver */
 		}
@@ -138,7 +132,7 @@ public class DriverTracker extends ServiceTracker {
 	 */
 	public void modifiedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
-			log.log(reference, LogService.LOG_DEBUG, this + " modified service"); //$NON-NLS-1$
+			log.debug(reference, this + " modified service"); //$NON-NLS-1$
 		}
 
 		String driver_id = getDriverID(reference);
@@ -164,7 +158,7 @@ public class DriverTracker extends ServiceTracker {
 	 */
 	public void removedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
-			log.log(reference, LogService.LOG_DEBUG, this + " removing service"); //$NON-NLS-1$
+			log.debug(reference, this + " removing service"); //$NON-NLS-1$
 		}
 
 		String driver_id = getDriverID(reference);
@@ -212,7 +206,7 @@ public class DriverTracker extends ServiceTracker {
 		String driver_id = (String) reference.getProperty(org.osgi.service.device.Constants.DRIVER_ID);
 
 		if (driver_id == null) {
-			log.log(reference, LogService.LOG_WARNING, DeviceMsg.Driver_service_has_no_DRIVER_ID);
+			log.warn(reference, DeviceMsg.Driver_service_has_no_DRIVER_ID);
 			driver_id = AccessController
 					.doPrivileged((PrivilegedAction<String>) () -> reference.getBundle().getLocation());
 		}
@@ -223,7 +217,6 @@ public class DriverTracker extends ServiceTracker {
 	/**
 	 * Get the ServiceReference for a given DRIVER_ID.
 	 *
-	 * @param driver_id
 	 * @return ServiceReference to a Driver service.
 	 */
 	public ServiceReference getDriver(String driver_id) {
@@ -235,9 +228,9 @@ public class DriverTracker extends ServiceTracker {
 	 *
 	 * @return ServiceReference to best matched Driver or null of their is no match.
 	 */
-	public ServiceReference match(ServiceReference device, Vector exclude) {
+	public ServiceReference match(ServiceReference device, Vector<ServiceReference> exclude) {
 		if (Activator.DEBUG) {
-			log.log(device, LogService.LOG_DEBUG, this + ": Driver match called"); //$NON-NLS-1$
+			log.debug(device, this + ": Driver match called"); //$NON-NLS-1$
 		}
 
 		ServiceReference[] references = getServiceReferences();
@@ -252,11 +245,11 @@ public class DriverTracker extends ServiceTracker {
 
 				if (exclude.contains(driver)) {
 					if (Activator.DEBUG) {
-						log.log(driver, LogService.LOG_DEBUG, this + ": Driver match excluded: " + drivers.get(driver)); //$NON-NLS-1$
+						log.debug(driver, this + ": Driver match excluded: " + drivers.get(driver)); //$NON-NLS-1$
 					}
 				} else {
 					if (Activator.DEBUG) {
-						log.log(driver, LogService.LOG_DEBUG, this + ": Driver match called: " + drivers.get(driver)); //$NON-NLS-1$
+						log.debug(driver, this + ": Driver match called: " + drivers.get(driver)); //$NON-NLS-1$
 					}
 
 					Match match = getMatch(driver, device);
@@ -273,13 +266,13 @@ public class DriverTracker extends ServiceTracker {
 						try {
 							matchValue = service.match(device);
 						} catch (Throwable t) {
-							log.log(driver, LogService.LOG_ERROR, DeviceMsg.Driver_error_during_match, t);
+							log.error(driver, DeviceMsg.Driver_error_during_match, t);
 
 							continue;
 						}
 
 						if (Activator.DEBUG) {
-							log.log(driver, LogService.LOG_DEBUG, this + ": Driver match value: " + matchValue); //$NON-NLS-1$
+							log.debug(driver, this + ": Driver match value: " + matchValue); //$NON-NLS-1$
 						}
 
 						match = new Match(driver, matchValue);
@@ -340,9 +333,9 @@ public class DriverTracker extends ServiceTracker {
 	 * @param device Device to be attached
 	 * @return true is the Driver successfully attached.
 	 */
-	public boolean attach(ServiceReference driver, ServiceReference device, Vector exclude) {
+	public boolean attach(ServiceReference driver, ServiceReference device, Vector<ServiceReference> exclude) {
 		if (Activator.DEBUG) {
-			log.log(driver, LogService.LOG_DEBUG, this + ": Driver attach called: " + drivers.get(driver)); //$NON-NLS-1$
+			log.debug(driver, this + ": Driver attach called: " + drivers.get(driver)); //$NON-NLS-1$
 		}
 
 		Driver service = (Driver) getService(driver);
@@ -354,7 +347,7 @@ public class DriverTracker extends ServiceTracker {
 				try {
 					referral = service.attach(device);
 				} catch (Throwable t) {
-					log.log(driver, LogService.LOG_ERROR, DeviceMsg.Driver_error_during_attach, t);
+					log.error(driver, DeviceMsg.Driver_error_during_attach, t);
 
 					exclude.addElement(driver);
 
@@ -369,15 +362,14 @@ public class DriverTracker extends ServiceTracker {
 			}
 
 			if (referral == null) {
-				log.log(device, LogService.LOG_INFO,
-						NLS.bind(DeviceMsg.Device_attached_by_DRIVER_ID, drivers.get(driver)));
+				log.info(device, NLS.bind(DeviceMsg.Device_attached_by_DRIVER_ID, drivers.get(driver)));
 
 				manager.locators.usingDriverBundle(driver.getBundle());
 
 				return (true);
 			}
 
-			log.log(device, LogService.LOG_INFO, NLS.bind(DeviceMsg.Device_referred_to, referral));
+			log.info(device, NLS.bind(DeviceMsg.Device_referred_to, referral));
 			manager.locators.loadDriver(referral, this);
 		}
 

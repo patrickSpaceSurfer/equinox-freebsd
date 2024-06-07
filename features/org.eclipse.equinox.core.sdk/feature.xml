@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.core.sdk"
       label="%featureName"
-      version="3.24.200.qualifier"
+      version="3.25.100.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -72,15 +72,13 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.equinox.security.win32.x86_64"
+         id="org.eclipse.equinox.security.win32"
          os="win32"
-         arch="x86_64"
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.equinox.security.win32.x86_64.source"
+         id="org.eclipse.equinox.security.win32.source"
          os="win32"
-         arch="x86_64"
          version="0.0.0"/>
 
    <plugin

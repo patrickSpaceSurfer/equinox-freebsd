@@ -17,7 +17,6 @@
 
 package org.eclipse.equinox.weaving.hooks;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -45,7 +44,6 @@ public class WeavingBundleFile extends AbstractWeavingBundleFile {
 	 * @param adaptorProvider A provider that allows this wrapper to gain access to
 	 *                        the adaptor of this bundle
 	 * @param bundleFile      The wrapped bundle file
-	 * @throws IOException
 	 */
 	public WeavingBundleFile(final BundleAdaptorProvider adaptorProvider, final BundleFile bundleFile) {
 		super(adaptorProvider, bundleFile);

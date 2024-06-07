@@ -127,7 +127,6 @@ public class BridgeServlet extends HttpServlet {
 	 * service is called by the Servlet Container and will first determine if the
 	 * request is a framework control and will otherwise try to delegate to the
 	 * registered servlet delegate
-	 * 
 	 */
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -189,7 +188,6 @@ public class BridgeServlet extends HttpServlet {
 	 * (e.g. stops, undeploys, deploys, starts) sp_start - Starts a deployed
 	 * platform sp_stop - Stops the platform
 	 */
-	@SuppressWarnings("resource")
 	private boolean serviceFrameworkControls(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String pathInfo = req.getPathInfo();
 		if (pathInfo.equals("/sp_start")) { //$NON-NLS-1$
