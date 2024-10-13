@@ -114,8 +114,13 @@ case $defaultOS in
 				;;
 		esac
 		;;
+	FreeBSD|freebsd)
+		defaultOS="freebsd"
+		defaultJava=DEFAULT_JAVA_EXEC
+		makefile="make_linux.mak"
+		;;
 	*)
-	echo "Unknown OS -- build aborted"
+	echo "Unknown OS $defaultOS -- build aborted"
 	;;
 esac
 export CC
@@ -154,13 +159,13 @@ export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS DEFAULT_JAVA EXE_OUT
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then
 	if [ "$extraArgs" != "" ]; then
-		make -f $makefile $extraArgs
+		gmake -f $makefile $extraArgs
 	else
 		echo "Building $OS launcher. Defaults: -os $DEFAULT_OS -arch $DEFAULT_OS_ARCH -ws $DEFAULT_WS"
-		make -f $makefile clean
+		gmake -f $makefile clean
 		case x$CC in
-		  x*gcc*) make -f $makefile all PICFLAG=-fpic ;;
-		  *)      make -f $makefile all ;;
+		  x*gcc*) gmake -f $makefile all PICFLAG=-fpic ;;
+		  *)      gmake -f $makefile all ;;
 		esac
 	fi
 else
